@@ -8,11 +8,6 @@ export default function TimelineDemo() {
       title: "Мамыр 2024",
       content: (
         <div>
-          <p className="text-neutral-800 dark:text-neutral-200 text-xs md:text-sm font-normal mb-8">
-            1 дрон <br />: Цена-5000 +:
-            <br /> отличный дрон за свою цену -:
-            <br /> сложность в управлений Плохое качество
-          </p>
           <div className="mb-8">
             <div className="flex gap-2 items-center text-neutral-700 dark:text-neutral-300 text-xs md:text-sm">
               ✅ Цена: 5000
