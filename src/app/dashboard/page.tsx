@@ -2,14 +2,8 @@ import { HumidityGraph } from "@/components/charts/humidity-graph";
 import { InteractiveChart } from "@/components/charts/interactive-chart";
 import AreaGraph from "@/components/charts/temperature-graph";
 import PageContainer from "@/components/layout/page-container";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 
 export default function Page() {
   return (
@@ -134,16 +128,16 @@ export default function Page() {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2">
               {/* Температура графигі */}
               <div className="h-[400px]">
-                <AreaGraph data={temperatureData} />
+                <AreaGraph />
               </div>
               {/* Ылғалдылық графигі */}
               <div className="h-[400px]">
-                <HumidityGraph data={humidityData} />
+                <HumidityGraph />
               </div>
             </div>
             {/* Interactive Chart */}
             <div className="h-[400px]">
-              <InteractiveChart data={interactiveData} />
+              <InteractiveChart />
             </div>
           </TabsContent>
         </Tabs>
@@ -152,32 +146,32 @@ export default function Page() {
   );
 }
 
-// Температура және ылғалдылық графиктеріне арналған мысал деректер
-const temperatureData = [
-  { time: "00:00", value: 20 },
-  { time: "06:00", value: 21 },
-  { time: "12:00", value: 23 },
-  { time: "18:00", value: 22 },
-  { time: "00:00", value: 21 },
-];
+// // Температура және ылғалдылық графиктеріне арналған мысал деректер
+// const temperatureData = [
+//   { time: "00:00", value: 20 },
+//   { time: "06:00", value: 21 },
+//   { time: "12:00", value: 23 },
+//   { time: "18:00", value: 22 },
+//   { time: "00:00", value: 21 },
+// ];
 
-const humidityData = [
-  { time: "00:00", value: 60 },
-  { time: "06:00", value: 62 },
-  { time: "12:00", value: 65 },
-  { time: "18:00", value: 64 },
-  { time: "00:00", value: 63 },
-];
+// const humidityData = [
+//   { time: "00:00", value: 60 },
+//   { time: "06:00", value: 62 },
+//   { time: "12:00", value: 65 },
+//   { time: "18:00", value: 64 },
+//   { time: "00:00", value: 63 },
+// ];
 
-// Interactive chart data
-const interactiveData = [
-  { date: "2024-04-01", temperature: 22, humidity: 60 },
-  { date: "2024-04-02", temperature: 23, humidity: 62 },
-  { date: "2024-04-03", temperature: 24, humidity: 65 },
-  { date: "2024-04-04", temperature: 25, humidity: 64 },
-  { date: "2024-04-05", temperature: 26, humidity: 63 },
-  { date: "2024-04-06", temperature: 27, humidity: 64 },
-  { date: "2024-04-07", temperature: 28, humidity: 65 },
-  { date: "2024-04-08", temperature: 29, humidity: 66 },
-  { date: "2024-04-09", temperature: 30, humidity: 67 },
-];
+// // Interactive chart data
+// const interactiveData = [
+//   { date: "2024-04-01", temperature: 22, humidity: 60 },
+//   { date: "2024-04-02", temperature: 23, humidity: 62 },
+//   { date: "2024-04-03", temperature: 24, humidity: 65 },
+//   { date: "2024-04-04", temperature: 25, humidity: 64 },
+//   { date: "2024-04-05", temperature: 26, humidity: 63 },
+//   { date: "2024-04-06", temperature: 27, humidity: 64 },
+//   { date: "2024-04-07", temperature: 28, humidity: 65 },
+//   { date: "2024-04-08", temperature: 29, humidity: 66 },
+//   { date: "2024-04-09", temperature: 30, humidity: 67 },
+// ];

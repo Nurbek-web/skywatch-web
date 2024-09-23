@@ -83,24 +83,6 @@ const FeatureOne = () => {
 };
 
 const FeatureTwo = () => {
-  const variants = {
-    initial: {
-      width: 0,
-    },
-    animate: {
-      width: "100%",
-      transition: {
-        duration: 0.2,
-      },
-    },
-    hover: {
-      width: ["0%", "100%"],
-      transition: {
-        duration: 2,
-      },
-    },
-  };
-  const arr = new Array(6).fill(0);
   return (
     <motion.div
       initial="initial"

@@ -24,8 +24,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const generateChartData = () => {
-  const data = [];
+interface ChartData {
+  date: string;
+  temperature: number;
+  humidity: number;
+}
+
+const generateChartData = (): ChartData[] => {
+  const data: ChartData[] = [];
   const startDate = new Date("2024-04-01");
   for (let i = 0; i < 90; i++) {
     const date = new Date(startDate);

@@ -61,16 +61,15 @@ interface WorldProps {
 let numbersOfRings = [0];
 
 export function Globe({ globeConfig, data }: WorldProps) {
-  const [globeData, setGlobeData] = useState<
-    | {
-        size: number;
-        order: number;
-        color: (t: number) => string;
-        lat: number;
-        lng: number;
-      }[]
-    | null
-  >(null);
+  type GlobeDataType = {
+    size: number;
+    order: number;
+    color: (t: number) => string;
+    lat: number;
+    lng: number;
+  };
+
+  const [globeData, setGlobeData] = useState<GlobeDataType[] | null>(null);
 
   const globeRef = useRef<ThreeGlobe | null>(null);
 
@@ -115,7 +114,7 @@ export function Globe({ globeConfig, data }: WorldProps) {
 
   const _buildData = () => {
     const arcs = data;
-    let points = [];
+    let points: GlobeDataType[] = [];
     for (let i = 0; i < arcs.length; i++) {
       const arc = arcs[i];
       const rgb = hexToRgb(arc.color) as { r: number; g: number; b: number };
@@ -295,7 +294,7 @@ export function hexToRgb(hex: string) {
 }
 
 export function genRandomNumbers(min: number, max: number, count: number) {
-  const arr = [];
+  const arr: number[] = [];
   while (arr.length < count) {
     const r = Math.floor(Math.random() * (max - min)) + min;
     if (arr.indexOf(r) === -1) arr.push(r);

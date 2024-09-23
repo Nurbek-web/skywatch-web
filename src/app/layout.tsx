@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { FloatingNav } from "@/components/ui/floating-navbar";
 import ThemeProvider from "@/components/layout/ThemeToggle/theme-provider";
 // import { IconHome, IconMessage, IconUser } from "@tabler/icons-react";
 
