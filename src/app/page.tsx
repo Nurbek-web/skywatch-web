@@ -13,7 +13,6 @@ export default function Home() {
       <BentoGrid />
       <TimelineDemo />
       <GlobeDemo />
-      <ChartArea />
     </div>
   );
 }
