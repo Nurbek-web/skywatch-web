@@ -47,8 +47,12 @@ export function DashboardNav({
                   <Link
                     href={item.disabled ? "/" : item.href}
                     className={cn(
-                      "flex items-center gap-2 overflow-hidden rounded-md py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
-                      path === item.href ? "bg-accent" : "transparent",
+                      "flex items-center gap-2 overflow-hidden rounded-md py-2 text-sm font-medium",
+                      "text-black hover:bg-accent hover:text-accent-foreground", // Explicit light mode text color
+                      "dark:text-white dark:hover:bg-accent-dark dark:hover:text-accent-foreground-dark", // Explicit dark mode text color
+                      path === item.href
+                        ? "bg-accent dark:bg-accent-dark"
+                        : "transparent",
                       item.disabled && "cursor-not-allowed opacity-80"
                     )}
                     onClick={() => {
@@ -68,7 +72,10 @@ export function DashboardNav({
                   align="center"
                   side="right"
                   sideOffset={8}
-                  className={!isMinimized ? "hidden" : "inline-block"}
+                  className={cn(
+                    !isMinimized ? "hidden" : "inline-block",
+                    "bg-white text-black dark:bg-accent-dark dark:text-accent-foreground-dark" // Ensure tooltip text is also visible
+                  )}
                 >
                   {item.title}
                 </TooltipContent>

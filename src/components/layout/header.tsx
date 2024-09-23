@@ -11,7 +11,7 @@ export default function Header() {
           <MobileSidebar />
         </div>
         <div className="flex items-center gap-2">
-          <UserNav />
+          {/* <UserNav /> */}
           <ThemeToggle />
         </div>
       </nav>
