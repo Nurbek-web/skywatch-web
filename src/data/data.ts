@@ -124,9 +124,9 @@ export const navItems: NavItem[] = [
     label: "kanban",
   },
   {
-    title: "SkyWatch AI",
+    title: "Disease detection",
     href: "/dashboard/disease",
-    icon: "kanban",
+    icon: "warning",
     label: "kanban",
   },
   {
