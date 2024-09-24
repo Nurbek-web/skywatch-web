@@ -10,6 +10,7 @@ export default function DiseaseDectionPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [diseaseInfo, setDiseaseInfo] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const analyzeImage = async (base64Image: string) => {
     try {
@@ -22,18 +23,31 @@ export default function DiseaseDectionPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to analyze image");
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || `HTTP error! status: ${response.status}`
+        );
       }
 
       const result = await response.json();
+
+      if (!result || !result.analysis) {
+        throw new Error("Invalid response from server");
+      }
+
       return parseOpenAIResponse(result.analysis);
     } catch (error) {
       console.error("Error analyzing image:", error);
-      return null;
+      throw new Error("Failed to analyze the image. Please try again.");
     }
   };
 
   const parseOpenAIResponse = (response: string) => {
+    if (typeof response !== "string") {
+      console.error("Invalid response type:", typeof response);
+      throw new Error("Invalid response from OpenAI");
+    }
+
     const lines = response.split("\n");
     const info: any = {};
     let currentKey = "";
@@ -48,6 +62,10 @@ export default function DiseaseDectionPage() {
       }
     }
 
+    if (Object.keys(info).length === 0) {
+      throw new Error("Unable to parse disease information from the response");
+    }
+
     return info;
   };
 
@@ -60,10 +78,21 @@ export default function DiseaseDectionPage() {
           const base64 = (e.target?.result as string).split(",")[1];
           setSelectedImage(`data:image/jpeg;base64,${base64}`);
           setIsAnalyzing(true);
+          setError(null);
 
-          const result = await analyzeImage(base64);
-          setDiseaseInfo(result);
-          setIsAnalyzing(false);
+          try {
+            const result = await analyzeImage(base64);
+            setDiseaseInfo(result);
+          } catch (error) {
+            console.error("Error during image analysis:", error);
+            setError(
+              (error instanceof Error ? error.message : "Unknown error") ||
+                "Failed to analyze the image. Please try again."
+            );
+            setDiseaseInfo(null);
+          } finally {
+            setIsAnalyzing(false);
+          }
         };
         reader.readAsDataURL(file);
       }
@@ -128,21 +157,35 @@ export default function DiseaseDectionPage() {
         </div>
       )}
 
+      {error && (
+        <div className="text-center mb-8 text-red-500">
+          <p>{error}</p>
+        </div>
+      )}
+
       {diseaseInfo && (
         <Card>
           <CardHeader>
             <CardTitle>Detection Result</CardTitle>
           </CardHeader>
           <CardContent>
-            <h3 className="text-xl font-semibold mb-2">{diseaseInfo.name}</h3>
+            <h3 className="text-xl font-semibold mb-2">
+              {diseaseInfo.name || "Unknown Disease"}
+            </h3>
             <p className="mb-4">
-              <strong>Type:</strong> {diseaseInfo.type}
+              <strong>Type:</strong> {diseaseInfo.type || "Not specified"}
             </p>
-            <p className="mb-4">{diseaseInfo.description}</p>
+            <p className="mb-4">
+              {diseaseInfo.description || "No description available"}
+            </p>
             <h4 className="text-lg font-semibold mb-2">Symptoms:</h4>
-            <p className="mb-4">{diseaseInfo.symptoms}</p>
+            <p className="mb-4">
+              {diseaseInfo.symptoms || "No symptoms information available"}
+            </p>
             <h4 className="text-lg font-semibold mb-2">Management:</h4>
-            <p>{diseaseInfo.management}</p>
+            <p>
+              {diseaseInfo.management || "No management information available"}
+            </p>
           </CardContent>
         </Card>
       )}
