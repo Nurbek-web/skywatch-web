@@ -31,6 +31,9 @@ export default function DiseaseDectionPage() {
 
       const result = await response.json();
 
+      // Log the response from OpenAI
+      console.log("OpenAI Response:", result);
+
       if (!result || !result.analysis) {
         throw new Error("Invalid response from server");
       }
@@ -48,6 +51,14 @@ export default function DiseaseDectionPage() {
       throw new Error("Invalid response from OpenAI");
     }
 
+    // Directly return the response if it's a freeform text
+    if (response.includes("i'm sorry, but i cannot view images directly")) {
+      return {
+        message: response,
+      };
+    }
+
+    // Fallback for structured responses (if any)
     const lines = response.split("\n");
     const info: any = {};
     let currentKey = "";
@@ -163,29 +174,13 @@ export default function DiseaseDectionPage() {
         </div>
       )}
 
-      {diseaseInfo && (
+      {diseaseInfo && diseaseInfo.message && (
         <Card>
           <CardHeader>
-            <CardTitle>Detection Result</CardTitle>
+            <CardTitle>AI Response</CardTitle>
           </CardHeader>
           <CardContent>
-            <h3 className="text-xl font-semibold mb-2">
-              {diseaseInfo.name || "Unknown Disease"}
-            </h3>
-            <p className="mb-4">
-              <strong>Type:</strong> {diseaseInfo.type || "Not specified"}
-            </p>
-            <p className="mb-4">
-              {diseaseInfo.description || "No description available"}
-            </p>
-            <h4 className="text-lg font-semibold mb-2">Symptoms:</h4>
-            <p className="mb-4">
-              {diseaseInfo.symptoms || "No symptoms information available"}
-            </p>
-            <h4 className="text-lg font-semibold mb-2">Management:</h4>
-            <p>
-              {diseaseInfo.management || "No management information available"}
-            </p>
+            <p>{diseaseInfo.message}</p>
           </CardContent>
         </Card>
       )}

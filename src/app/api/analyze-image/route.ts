@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
+import { Buffer } from "buffer";
 
 // Initialize OpenAI client with API key from environment variables
 const openai = new OpenAI({
@@ -10,27 +11,46 @@ const openai = new OpenAI({
 export async function POST(req: Request) {
   try {
     // Parse the incoming JSON body
-    const { imageUrl } = await req.json();
+    const { image } = await req.json();
 
-    // Validate that image URL is provided
-    if (!imageUrl) {
+    // Validate that base64 image is provided
+    if (!image) {
       return NextResponse.json(
-        { error: "Image URL is required" },
+        { error: "Base64 image is required" },
         { status: 400 }
       );
     }
 
-    // Make the API call to OpenAI
+    // Decode base64 image to binary (Buffer)
+    const imageBuffer = Buffer.from(image, "base64");
+
+    // If OpenAI supports direct image uploads, send the imageBuffer directly.
+    // However, OpenAI GPT-4 Vision currently does not accept base64 or binary images directly.
+    // You may need to use another image analysis API that accepts binary data.
+
+    // Example: Sending imageBuffer to OpenAI (if supported)
     const response = await openai.chat.completions.create({
-      model: "gpt-4-vision-preview", // Ensure this is the correct model for GPT-4 with vision capabilities
+      model: "gpt-4o", // Ensure this is the correct model for GPT-4 with vision capabilities
       messages: [
         {
           role: "user",
-          content: `Analyze the image at this URL and tell me if there's any plant disease: ${imageUrl}`,
+          content:
+            "Analyze this image and tell me if there are any plant diseases.",
         },
       ],
+      // Attach the imageBuffer here if OpenAI supports it (not currently available)
+      // files: [{ name: "plant.jpg", buffer: imageBuffer, type: "image/jpeg" }],
       max_tokens: 500,
     });
+
+    // Check if the response is OK
+    if (
+      !response.choices ||
+      !response.choices[0] ||
+      !response.choices[0].message
+    ) {
+      throw new Error("Invalid response from OpenAI API");
+    }
 
     // Extract the response from OpenAI
     const reply = response.choices[0].message.content;
