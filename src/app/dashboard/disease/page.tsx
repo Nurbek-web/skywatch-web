@@ -12,72 +12,39 @@ export default function DiseaseDectionPage() {
   const [diseaseInfo, setDiseaseInfo] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const analyzeImage = async (base64Image: string) => {
-    try {
-      const response = await fetch("/api/analyze-image", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ image: base64Image }),
-      });
+  // Function to generate a random message in Kazakh
+  const getRandomMessage = () => {
+    const messages = [
+      "Өсімдікте ерте фитофтороз белгілері байқалады. Фунгицид қолданып, өсімдікті мұқият бақылаңыз.",
+      "Өсімдікте қоректік заттардың жетіспеушілігі байқалады, мүмкін азот жетіспейді. Теңдестірілген тыңайтқышты қолданып көріңіз.",
+      "Өсімдік сау көрінеді, бірақ жеткілікті күн сәулесі мен су алуын қамтамасыз етіңіз.",
+      "Өсімдікте ұнтақты зең ауруының белгілері бар. Өсімдікті желдетілетін жерде ұстаңыз және фунгицид қолданыңыз.",
+      "Өсімдіктің жапырақтарында сарғаю байқалады, бұл темірдің жетіспеушілігі болуы мүмкін. Темірге бай тыңайтқыш қолданыңыз.",
+      "Өсімдікте бактериалды дақ ауруының белгілері бар. Зақымдалған бөліктерді алып тастап, өсімдікті оқшаулаңыз.",
+      "Өсімдіктің тамырларында шіру белгілері бар. Артық суаруды тоқтатып, топырақтың дренажын жақсартыңыз.",
+      "Өсімдікте жәндіктердің зақымдану белгілері бар. Инсектицид қолданыңыз және өсімдікті тексеріңіз.",
+      "Өсімдікке күн сәулесі жетіспейді. Оны жарық жерге қойып, суаруды реттеңіз.",
+      "Өсімдіктің жапырақтары қурап жатыр. Бұл шамадан тыс суарудың белгісі болуы мүмкін. Суару жиілігін азайтыңыз.",
+      "Өсімдікте саңырауқұлақ ауруының белгілері бар. Өсімдікті оқшаулап, арнайы фунгицид қолданыңыз.",
+      "Өсімдікте фузариоз белгілері байқалады. Топырақты ауыстырып, өсімдікті мұқият бақылаңыз.",
+      "Өсімдіктің жапырақтары күйіп кеткендей көрінеді. Бұл шамадан тыс күн сәулесінің әсері болуы мүмкін.",
+      "Өсімдікте вирустық инфекцияның белгілері бар. Өсімдікті оқшаулап, арнайы күтім жасаңыз.",
+      "Өсімдікке тыңайтқыш қажет. Қоректік заттарға бай тыңайтқыш қолданып көріңіз.",
+    ];
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || `HTTP error! status: ${response.status}`
-        );
-      }
-
-      const result = await response.json();
-
-      // Log the response from OpenAI
-      console.log("OpenAI Response:", result);
-
-      if (!result || !result.analysis) {
-        throw new Error("Invalid response from server");
-      }
-
-      return parseOpenAIResponse(result.analysis);
-    } catch (error) {
-      console.error("Error analyzing image:", error);
-      throw new Error("Failed to analyze the image. Please try again.");
-    }
+    // Randomly pick one message
+    const randomIndex = Math.floor(Math.random() * messages.length);
+    return { message: messages[randomIndex] };
   };
 
-  const parseOpenAIResponse = (response: string) => {
-    if (typeof response !== "string") {
-      console.error("Invalid response type:", typeof response);
-      throw new Error("Invalid response from OpenAI");
-    }
-
-    // Directly return the response if it's a freeform text
-    if (response.includes("i'm sorry, but i cannot view images directly")) {
-      return {
-        message: response,
-      };
-    }
-
-    // Fallback for structured responses (if any)
-    const lines = response.split("\n");
-    const info: any = {};
-    let currentKey = "";
-
-    for (const line of lines) {
-      if (line.includes(":")) {
-        const [key, value] = line.split(":");
-        currentKey = key.trim().toLowerCase();
-        info[currentKey] = value.trim();
-      } else if (currentKey) {
-        info[currentKey] += " " + line.trim();
-      }
-    }
-
-    if (Object.keys(info).length === 0) {
-      throw new Error("Unable to parse disease information from the response");
-    }
-
-    return info;
+  // Fake image analysis function
+  const analyzeImage = async (base64Image: string) => {
+    // Simulate a delay to mimic real API behavior
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(getRandomMessage());
+      }, 2000); // Simulate a 2-second delay
+    });
   };
 
   const handleImageUpload = useCallback(
@@ -98,7 +65,7 @@ export default function DiseaseDectionPage() {
             console.error("Error during image analysis:", error);
             setError(
               (error instanceof Error ? error.message : "Unknown error") ||
-                "Failed to analyze the image. Please try again."
+                "Суретті талдау сәтсіз аяқталды. Қайта көріңіз."
             );
             setDiseaseInfo(null);
           } finally {
@@ -114,7 +81,7 @@ export default function DiseaseDectionPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8 text-center">
-        Plant Disease Detection
+        Өсімдік ауруларын анықтау
       </h1>
 
       <div className="mb-8">
@@ -126,11 +93,13 @@ export default function DiseaseDectionPage() {
             <div className="flex flex-col items-center justify-center pt-5 pb-6">
               <Upload className="w-10 h-10 mb-3 text-gray-400" />
               <p className="mb-2 text-sm text-gray-500">
-                <span className="font-semibold">Click to upload</span> or drag
-                and drop
+                <span className="font-semibold">
+                  Суретті жүктеу үшін басыңыз
+                </span>{" "}
+                немесе сүйреп әкеліп тастаңыз
               </p>
               <p className="text-xs text-gray-500">
-                PNG, JPG or GIF (MAX. 800x400px)
+                PNG, JPG немесе GIF (MAX. 800x400px)
               </p>
             </div>
             <input
@@ -147,12 +116,12 @@ export default function DiseaseDectionPage() {
       {selectedImage && (
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Uploaded Image</CardTitle>
+            <CardTitle>Жүктелген сурет</CardTitle>
           </CardHeader>
           <CardContent>
             <Image
               src={selectedImage}
-              alt="Uploaded plant"
+              alt="Жүктелген өсімдік"
               width={400}
               height={300}
               className="rounded-lg"
@@ -164,7 +133,7 @@ export default function DiseaseDectionPage() {
       {isAnalyzing && (
         <div className="text-center mb-8">
           <AlertCircle className="w-10 h-10 mx-auto mb-4 animate-pulse text-yellow-500" />
-          <p className="text-lg font-semibold">Analyzing image...</p>
+          <p className="text-lg font-semibold">Сурет талдануда...</p>
         </div>
       )}
 
@@ -177,7 +146,7 @@ export default function DiseaseDectionPage() {
       {diseaseInfo && diseaseInfo.message && (
         <Card>
           <CardHeader>
-            <CardTitle>AI Response</CardTitle>
+            <CardTitle>AI Жауабы</CardTitle>
           </CardHeader>
           <CardContent>
             <p>{diseaseInfo.message}</p>
