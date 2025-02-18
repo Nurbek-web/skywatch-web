@@ -78,3 +78,11 @@
     height: 100dvh;
   }
 }
+
+.map-loading {
+  @apply h-full w-full flex items-center justify-center bg-gray-50 text-gray-600;
+}
+
+.leaflet-draw-toolbar .leaflet-draw-draw-polygon {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14zm-8 13v-4h-2v4H7l5 5 5-5h-2z"/></svg>') !important;
+}

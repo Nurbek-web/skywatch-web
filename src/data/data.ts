@@ -130,9 +130,16 @@ export const navItems: NavItem[] = [
     label: "kanban",
   },
   {
+    title: "Field",
+    href: "/dashboard/field",
+    icon: "media",
+    label: "profile",
+  },
+  {
     title: "Profile",
     href: "/",
     icon: "profile",
     label: "profile",
   },
+  
 ];

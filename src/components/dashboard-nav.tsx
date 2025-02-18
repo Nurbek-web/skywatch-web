@@ -48,8 +48,8 @@ export function DashboardNav({
                     href={item.disabled ? "/" : item.href}
                     className={cn(
                       "flex items-center gap-2 overflow-hidden rounded-md py-2 text-sm font-medium",
-                      "text-black hover:bg-accent hover:text-accent-foreground", // Explicit light mode text color
-                      "dark:text-white dark:hover:bg-accent-dark dark:hover:text-accent-foreground-dark", // Explicit dark mode text color
+                      "text-black hover:bg-accent hover:text-accent-foreground",
+                      "dark:text-white dark:hover:bg-accent-dark dark:hover:text-accent-foreground-dark",
                       path === item.href
                         ? "bg-accent dark:bg-accent-dark"
                         : "transparent",
