@@ -12,6 +12,7 @@ import {
   ArrowRightIcon,
 } from "@heroicons/react/20/solid";
 import { Suspense } from "react";
+import type { LatLngExpression } from "leaflet";
 
 interface ImageryItem {
   id: string;
@@ -53,6 +54,17 @@ interface NDVIEntry {
   };
 }
 
+interface NDVIResponseItem {
+  dt: number;
+  data: {
+    mean: number;
+    min: number;
+    max: number;
+    std: number;
+  };
+  source: string;
+}
+
 // Map configuration
 const LAT_LNG_BOUNDS = [
   [42.25, 69.5], // Shymkent coordinates
@@ -71,14 +83,31 @@ const MapContainer = dynamic(
 );
 const TileLayer = dynamic(
   () => import("react-leaflet").then((mod) => mod.TileLayer),
-  { ssr: false }
+  {
+    ssr: false,
+    loading: () => <div className="tile-layer-loading">Loading tiles...</div>,
+  }
 );
 const FeatureGroup = dynamic(
   () => import("react-leaflet").then((mod) => mod.FeatureGroup),
-  { ssr: false }
+  {
+    ssr: false,
+    loading: () => (
+      <div className="feature-group-loading">Loading features...</div>
+    ),
+  }
 );
 const EditControl = dynamic(
-  () => import("react-leaflet-draw").then((mod) => mod.EditControl),
+  () =>
+    import("react-leaflet-draw").then(
+      (mod) =>
+        mod.EditControl as React.ComponentType<{
+          position?: string;
+          draw?: any;
+          edit?: any;
+          onCreated?: (e: any) => void;
+        }>
+    ),
   { ssr: false }
 );
 
@@ -113,7 +142,7 @@ const StatBox = ({ label, value }: { label: string; value?: number }) => (
 );
 
 export default function FieldPage() {
-  const mapRef = useRef<any>(null);
+  const mapRef = useRef<import("leaflet").Map | null>(null);
   const [polygons, setPolygons] = useState<PolygonData[]>([]);
   const [selectedPolygonId, setSelectedPolygonId] = useState<string | null>(
     null
@@ -140,12 +169,13 @@ export default function FieldPage() {
   // Leaflet icon fix
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const L = require("leaflet");
-      delete L.Icon.Default.prototype._getIconUrl;
+      const L = require("leaflet") as typeof import("leaflet");
+      delete (L.Icon.Default.prototype as any)._getIconUrl;
       L.Icon.Default.mergeOptions({
-        iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
-        iconUrl: require("leaflet/dist/images/marker-icon.png"),
-        shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
+        iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png")
+          .default,
+        iconUrl: require("leaflet/dist/images/marker-icon.png").default,
+        shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
       });
     }
   }, []);
@@ -250,7 +280,7 @@ export default function FieldPage() {
         data.map(async (item: any) => {
           const stats = await Promise.all(
             Object.entries(item.stats).map(async ([index, url]) => {
-              const res = await fetch(url);
+              const res = await fetch(url as string);
               return { [index]: await res.json() };
             })
           );
@@ -366,7 +396,9 @@ export default function FieldPage() {
   );
 
   // Modified fetch function with loading states
-  const fetchNDVIDates = async (polygonId: string) => {
+  const fetchNDVIDates = async (
+    polygonId: string
+  ): Promise<NDVIResponseItem[]> => {
     setIsLoading(true);
     try {
       // Add validation for polygon existence
@@ -485,15 +517,19 @@ export default function FieldPage() {
         responseData: data,
         validEntriesCount: validEntries.length,
       });
+
+      return validEntries as NDVIResponseItem[];
     } catch (error) {
       console.error("NDVI fetch error:", error);
       alert(
-        error.message ||
-          `Failed to load NDVI history. Please verify:\n` +
-            `1. Polygon exists and is valid\n` +
-            `2. Date range is within last 5 years\n` +
-            `3. API key has correct permissions`
+        error instanceof Error
+          ? error.message
+          : `Failed to load NDVI history. Please verify:\n` +
+              `1. Polygon exists and is valid\n` +
+              `2. Date range is within last 5 years\n` +
+              `3. API key has correct permissions`
       );
+      return [];
     } finally {
       setIsLoading(false);
     }
@@ -503,7 +539,7 @@ export default function FieldPage() {
   const handlePolygonSelect = async (id: string) => {
     setSelectedPolygonId(id);
     try {
-      const [polyRes, ndviDatesPromise] = await Promise.all([
+      const [polyRes, ndviData] = await Promise.all([
         fetch(
           `https://api.agromonitoring.com/agro/1.0/polygons/${id}?appid=${process.env.NEXT_PUBLIC_AGROMONITORING_API_KEY}`
         ),
@@ -511,17 +547,25 @@ export default function FieldPage() {
       ]);
 
       const polyData = await polyRes.json();
-      const ndviData = await ndviDatesPromise;
+
+      // Add type guard for NDVI data
+      const ndviMean =
+        Array.isArray(ndviData) && ndviData.length > 0
+          ? ndviData[0].data.mean
+          : undefined;
 
       // Update map view with proper coordinate order
       if (mapRef.current && polyData.geo_json) {
         const L = await import("leaflet");
         const coords = polyData.geo_json.geometry.coordinates[0];
         const bounds = L.latLngBounds(
-          coords.map(([lng, lat]: [number, number]) => L.latLng(lat, lng))
+          coords.map(
+            ([lng, lat]: [number, number]) =>
+              L.latLng(lat, lng) as import("leaflet").LatLngExpression
+          )
         );
         mapRef.current.flyToBounds(bounds, {
-          padding: [50, 50],
+          padding: [50, 50] as import("leaflet").PointExpression,
           duration: 1,
         });
       }
@@ -529,7 +573,7 @@ export default function FieldPage() {
       // Safely update polygon data with optional chaining
       setPolygonData({
         ...polyData,
-        ndvi: ndviData?.[0]?.data?.mean, // Updated path to NDVI value
+        ndvi: ndviMean,
       });
     } catch (error) {
       console.error("Polygon fetch error:", error);
@@ -801,26 +845,33 @@ export default function FieldPage() {
       <div className="h-full w-full">
         <Suspense fallback={<div>Loading map...</div>}>
           <MapContainer
-            center={[42.3, 69.6]}
-            zoom={12}
+            bounds={LAT_LNG_BOUNDS as import("leaflet").LatLngBoundsExpression}
             className="h-full w-full"
-            ref={mapRef}
+            ref={(map) => {
+              if (map) mapRef.current = map;
+            }}
           >
             <TileLayer
-              attribution='<a href="https://www.mapbox.com/about/maps/" target="_blank">Mapbox</a>'
               url={BASE_SATELLITE_URL}
-              maxZoom={22}
-              tileSize={512}
-              zoomOffset={-1}
+              attribution='&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a>'
+              {...({
+                maxZoom: 22,
+                tileSize: 512,
+                zoomOffset: -1,
+              } as import("leaflet").TileLayerOptions)}
             />
 
             {viewMode === "NDVI" && currentTileUrl && (
               <TileLayer
                 url={currentTileUrl}
                 opacity={0.7}
-                zIndexOffset={1000}
-                tileSize={512}
-                zoomOffset={-1}
+                {...({
+                  tileSize: 512,
+                  zoomOffset: -1,
+                  maxZoom: 18,
+                  zIndexOffset: 1000,
+                  attribution: "",
+                } as any)}
               />
             )}
 
@@ -889,7 +940,7 @@ export default function FieldPage() {
       {imageryList.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {imageryList.map((imagery) => (
-            <ImageryCard key={imagery.dt} imagery={imagery} />
+            <ImageryCard key={imagery.id} imagery={imagery} />
           ))}
         </div>
       ) : (
